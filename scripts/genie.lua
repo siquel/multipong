@@ -26,6 +26,7 @@ solution "multipong"
 dofile (path.join(JN_DIR, "scripts/toolchain.lua"))
 toolchain(PONG_BUILD_DIR, PONG_LIB_DIR)
 
+dofile (path.join(JN_DIR, "scripts/jn.lua"))
 
 project "client"
   kind "ConsoleApp"
