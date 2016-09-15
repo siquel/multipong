@@ -47,6 +47,15 @@ project "client"
       "JKN_CONFIG_DEBUG=1"
     }
 
+  configuration {}
+
+  configuration { "linux" }
+    links {
+        "pthread"
+    }
+
+  configuration {} --
+
 project "server"
   kind "ConsoleApp"
 
@@ -65,6 +74,14 @@ project "server"
     defines {
       "JKN_CONFIG_DEBUG=1"
     }
+  configuration {} 
+
+  configuration { "linux" }
+    links {
+        "pthread"
+    }
+
+  configuration {} --
 
 project "common"
   kind "StaticLib"
