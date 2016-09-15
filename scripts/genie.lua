@@ -36,10 +36,20 @@ project "client"
     path.join(PONG_DIR, "client/**.h")
   }
 
+  includedirs {
+    path.join(JN_DIR, "include"),
+    path.join(PONG_DIR, "client"),
+  }
+
 project "server"
   kind "ConsoleApp"
 
   files {
     path.join(PONG_DIR, "server/**.cpp"),
     path.join(PONG_DIR, "server/**.h")
+  }
+
+  includedirs {
+    path.join(JN_DIR, "include"),
+    path.join(PONG_DIR, "server"),
   }

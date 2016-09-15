@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <jkn/thread/thread.h>
 
 int main(int, char**)
 {
