@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <common/multipong_p.h>
 #include <jkn/jkn.h>
 
 int main(int, char**)

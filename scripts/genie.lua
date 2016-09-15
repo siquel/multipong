@@ -39,7 +39,13 @@ project "client"
   includedirs {
     path.join(JN_DIR, "include"),
     path.join(PONG_DIR, "client"),
+    path.join(PONG_DIR),
   }
+
+  configuration { "debug" }
+    defines {
+      "JKN_CONFIG_DEBUG=1"
+    }
 
 project "server"
   kind "ConsoleApp"
@@ -52,4 +58,28 @@ project "server"
   includedirs {
     path.join(JN_DIR, "include"),
     path.join(PONG_DIR, "server"),
+    path.join(PONG_DIR),
   }
+
+  configuration { "debug" }
+    defines {
+      "JKN_CONFIG_DEBUG=1"
+    }
+
+project "common"
+  kind "StaticLib"
+
+  files {
+    path.join(PONG_DIR, "common/**.cpp"),
+    path.join(PONG_DIR, "common/**.h")
+  }
+
+  includedirs {
+    path.join(JN_DIR, "include"),
+    path.join(PONG_DIR, "common")
+  }
+
+  configuration { "debug" }
+    defines {
+      "JKN_CONFIG_DEBUG=1"
+    }
