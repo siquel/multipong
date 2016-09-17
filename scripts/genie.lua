@@ -23,6 +23,17 @@ solution "multipong"
   language "C++"
   startproject "client"
 
+  defines {
+    "JKN_CONFIG_SOCKETS=1"
+  }
+
+  configuration { "debug" }
+    defines {
+      "JKN_CONFIG_DEBUG=1"
+    }
+
+  configuration {}
+
 dofile (path.join(JN_DIR, "scripts/toolchain.lua"))
 toolchain(PONG_BUILD_DIR, PONG_LIB_DIR)
 
@@ -42,12 +53,14 @@ project "client"
     path.join(PONG_DIR),
   }
 
-  configuration { "debug" }
-    defines {
-      "JKN_CONFIG_DEBUG=1"
-    }
+  links {
+    "jn"
+  }
 
-  configuration {}
+  configuration { "windows" }
+    links {
+      "ws2_32"
+    }
 
   configuration { "linux" }
     links {
@@ -70,11 +83,14 @@ project "server"
     path.join(PONG_DIR),
   }
 
-  configuration { "debug" }
-    defines {
-      "JKN_CONFIG_DEBUG=1"
+  links {
+    "jn"
+  }
+
+  configuration { "windows" }
+    links {
+      "ws2_32"
     }
-  configuration {} 
 
   configuration { "linux" }
     links {
@@ -95,8 +111,3 @@ project "common"
     path.join(JN_DIR, "include"),
     path.join(PONG_DIR, "common")
   }
-
-  configuration { "debug" }
-    defines {
-      "JKN_CONFIG_DEBUG=1"
-    }
