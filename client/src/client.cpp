@@ -32,7 +32,7 @@ int main(int, char**)
 
 
     jkn::IPAddress clientAddress;
-    jkn::addressSetHost(clientAddress, INADDR_ANY);
+    jkn::addressSetHost(clientAddress, 0 /*INADDR_ANY*/);
     clientAddress.m_port = 0;
     jkn::UDPSocket sock(clientAddress);
 
