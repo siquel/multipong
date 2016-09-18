@@ -29,7 +29,7 @@ int main(int, char**)
     jkn::IPAddress addr = {};
     addr.m_port = 1337;
     
-    jkn::addressSetHost(addr, 127, 0, 0, 1);
+    jkn::addressSetHost(addr, INADDR_ANY);
 
     char ip[128] = {};
     jkn::addressGetHostIp(addr, ip, sizeof(ip));
