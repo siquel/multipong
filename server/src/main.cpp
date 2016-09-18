@@ -38,6 +38,21 @@ int main(int, char**)
 
     printf("Starting server on ip %s:%d\n", ip, addr.m_port);
 
+    while (true)
+    {
+        jkn::IPAddress from = {};
+        char buffer[256];
+
+        int32_t bytes = socket.receive(buffer, sizeof(buffer), from);
+
+        if (bytes > 0)
+        {
+            char ip[64];
+            jkn::addressGetHostIp(from, ip, sizeof(ip));
+            fprintf(stderr, "%s ==> %s\n", ip, buffer);
+        }
+    }
+
     deinitialize();
     return 0;
 }
