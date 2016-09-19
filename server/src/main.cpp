@@ -8,8 +8,14 @@
 
 namespace pong
 {
-    int32_t manageProc(void*);
-    int32_t serverProc(void*);
+    int32_t serverProc(void*)
+    {
+        pong::Server server;
+
+        server.start();
+
+        return EXIT_SUCCESS;
+    }
 
     void initialize()
     {
@@ -32,7 +38,7 @@ namespace pong
 
     struct Context
     {
-        void run()
+        int32_t run()
         {
             initialize();
 
@@ -40,45 +46,32 @@ namespace pong
             jkn::Thread manageThread;
 
             serverThread.start(serverProc);
-            manageThread.start(manageProc);
+
+            char buffer[256];
+
+            while (fgets(buffer, sizeof(buffer), stdin) != NULL)
+            {
+                // replace new line
+                buffer[strcspn(buffer, "\n")] = '\0';
+
+                if (strcmp(buffer, "exit") == 0)
+                {
+                    m_eventQueue.pushExitEvent();
+                    break;
+                }
+            }
 
             serverThread.join();
-            manageThread.join();
 
             deinitialize();
+
+            return EXIT_SUCCESS;
         }
 
         pong::EventQueue m_eventQueue;
     };
 
     static Context s_ctx;
-
-    int32_t manageProc(void*)
-    {
-        char buffer[256];
-
-        while (fgets(buffer, sizeof(buffer), stdin) != NULL)
-        {
-            // replace new line
-            buffer[strcspn(buffer, "\n")] = '\0';
-
-            if (strcmp(buffer, "exit") == 0)
-            {
-                s_ctx.m_eventQueue.pushExitEvent();
-                break;
-            }
-        }
-        return EXIT_SUCCESS;
-    }
-
-    int32_t serverProc(void*)
-    {
-        pong::Server server;
-
-        server.start();
-
-        return EXIT_SUCCESS;
-    }
 
     bool nextEvent(pong::Event& _ev)
     {
@@ -88,7 +81,5 @@ namespace pong
 int main(int, char**)
 {
     using namespace pong;
-    s_ctx.run();
-
-    return 0;
+    return s_ctx.run();
 }
