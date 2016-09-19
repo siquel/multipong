@@ -3,56 +3,92 @@
 #include <jkn/thread/thread.h>
 #include <jkn/net/ip_address.h>
 #include <jkn/jkn.h>
+#include "server.h"
+#include "event_queue.h"
 
-void initialize()
+namespace pong
 {
-#if JKN_PLATFORM_WINDOWS
-    WSADATA wsa;
-    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+    int32_t manageProc(void*);
+    int32_t serverProc(void*);
+
+    void initialize()
     {
-        fprintf(stderr, "Failed to initialize winsock, error %d\n", WSAGetLastError());
-        exit(EXIT_FAILURE);
+#if JKN_PLATFORM_WINDOWS
+        WSADATA wsa;
+        if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+        {
+            fprintf(stderr, "Failed to initialize winsock, error %d\n", WSAGetLastError());
+            exit(EXIT_FAILURE);
+        }
+#endif
     }
-#endif
-}
 
-void deinitialize()
-{
-#if JKN_PLATFORM_WINDOWS
-    WSACleanup();
-#endif
-}
-
-int main(int, char**)
-{
-    initialize();
-    jkn::IPAddress addr = {};
-    addr.m_port = 1337;
-    
-    jkn::addressSetHost(addr, 0 /* INADDR_ANY*/);
-
-    char ip[128] = {};
-    jkn::addressGetHostIp(addr, ip, sizeof(ip));
-
-    jkn::UDPSocket socket(addr);
-
-    printf("Starting server on ip %s:%d\n", ip, addr.m_port);
-
-    while (true)
+    void deinitialize()
     {
-        jkn::IPAddress from = {};
+#if JKN_PLATFORM_WINDOWS
+        WSACleanup();
+#endif
+    }
+
+    struct Context
+    {
+        void run()
+        {
+            initialize();
+
+            jkn::Thread serverThread;
+            jkn::Thread manageThread;
+
+            serverThread.start(serverProc);
+            manageThread.start(manageProc);
+
+            serverThread.join();
+            manageThread.join();
+
+            deinitialize();
+        }
+
+        pong::EventQueue m_eventQueue;
+    };
+
+    static Context s_ctx;
+
+    int32_t manageProc(void*)
+    {
         char buffer[256];
 
-        int32_t bytes = socket.receive(buffer, sizeof(buffer), from);
-
-        if (bytes > 0)
+        while (fgets(buffer, sizeof(buffer), stdin) != NULL)
         {
-            char ip[64];
-            jkn::addressGetHostIp(from, ip, sizeof(ip));
-            fprintf(stderr, "%s ==> %s\n", ip, buffer);
+            // replace new line
+            buffer[strcspn(buffer, "\n")] = '\0';
+
+            if (strcmp(buffer, "exit") == 0)
+            {
+                s_ctx.m_eventQueue.pushExitEvent();
+                break;
+            }
         }
+        return EXIT_SUCCESS;
     }
 
-    deinitialize();
+    int32_t serverProc(void*)
+    {
+        pong::Server server;
+
+        server.start();
+
+        return EXIT_SUCCESS;
+    }
+
+    bool nextEvent(pong::Event& _ev)
+    {
+        return s_ctx.m_eventQueue.pop(_ev);
+    }
+}
+int main(int, char**)
+{
+    using namespace pong;
+    s_ctx.run();
+
     return 0;
 }
