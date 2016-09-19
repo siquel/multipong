@@ -32,6 +32,9 @@ namespace pong
                 char ip[64];
                 jkn::addressGetHostIp(from, ip, sizeof(ip));
                 printf("Got packet (size of %d bytes) from %s containing \"%s\"\n", bytes, ip, buffer);
+
+                const char response[] = "Haista paska";
+                m_socket.send(from, response, sizeof(response));
             }
         }
     }

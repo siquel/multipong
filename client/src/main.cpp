@@ -4,6 +4,7 @@
 #include <jkn/net/socket.h>
 #include <jkn/os.h>
 #include <common/network.h>
+#include "client.h"
 
 int main(int, char**)
 {
@@ -19,17 +20,14 @@ int main(int, char**)
     jkn::addressSetHost(serverAddress, 127, 0, 0, 1);
     serverAddress.m_port = 1337;
 
+    pong::Client client;
 
-    jkn::IPAddress clientAddress;
-    jkn::addressSetHost(clientAddress, 0 /*INADDR_ANY*/);
-    clientAddress.m_port = 0;
-    jkn::UDPSocket sock(clientAddress);
+    client.connect(serverAddress);
 
     while (true)
     {
-        char buffer[] = "Hello World!";
-        
-        sock.send(serverAddress, buffer, sizeof(buffer));
+        client.sendPackets();
+        client.receivePackets();
         jkn::sleep(1000);
     }
     
