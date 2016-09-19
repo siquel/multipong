@@ -5,7 +5,7 @@
 #include <jkn/jkn.h>
 #include "server.h"
 #include "event_queue.h"
-
+#include <common/network.h> // network
 namespace pong
 {
     int32_t serverProc(void*)
@@ -17,33 +17,20 @@ namespace pong
         return EXIT_SUCCESS;
     }
 
-    void initialize()
-    {
-#if JKN_PLATFORM_WINDOWS
-        WSADATA wsa;
-        if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-        {
-            fprintf(stderr, "Failed to initialize winsock, error %d\n", WSAGetLastError());
-            exit(EXIT_FAILURE);
-        }
-#endif
-    }
-
-    void deinitialize()
-    {
-#if JKN_PLATFORM_WINDOWS
-        WSACleanup();
-#endif
-    }
-
     struct Context
     {
         int32_t run()
         {
-            initialize();
+            bool result = common::networkInitialize();
+
+            JKN_ASSERT(result, "Network initialization failed");
+
+            if (!result)
+            {
+                return EXIT_FAILURE;
+            }
 
             jkn::Thread serverThread;
-            jkn::Thread manageThread;
 
             serverThread.start(serverProc);
 
@@ -63,7 +50,7 @@ namespace pong
 
             serverThread.join();
 
-            deinitialize();
+            common::networkShutdown();
 
             return EXIT_SUCCESS;
         }

@@ -54,7 +54,8 @@ project "client"
   }
 
   links {
-    "jn"
+    "jn",
+    "common"
   }
 
   configuration { "windows" }
@@ -84,7 +85,8 @@ project "server"
   }
 
   links {
-    "jn"
+    "jn",
+    "common"
   }
 
   configuration { "windows" }

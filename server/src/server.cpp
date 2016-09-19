@@ -12,7 +12,8 @@ namespace pong
     Server::Server()
         : m_socket(jkn::IPAddress { jkn::IPAddressType::IPv4, uint32_t(0) /* ANY */, Port })
     {
-
+        memset(m_clientConnected, 0, sizeof(m_clientConnected));
+        memset(m_clientAddress, 0, sizeof(m_clientAddress));
     }
 
     void Server::start()

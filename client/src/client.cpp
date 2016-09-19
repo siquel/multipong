@@ -3,29 +3,18 @@
 #include <jkn/net/ip_address.h>
 #include <jkn/net/socket.h>
 #include <jkn/os.h>
-
-void initialize()
-{
-#if JKN_PLATFORM_WINDOWS
-    WSADATA wsa;
-    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-    {
-        fprintf(stderr, "Failed to initialize winsock, error %d\n", WSAGetLastError());
-        exit(EXIT_FAILURE);
-    }
-#endif
-}
-
-void deinitialize()
-{
-#if JKN_PLATFORM_WINDOWS
-    WSACleanup();
-#endif
-}
+#include <common/network.h>
 
 int main(int, char**)
 {
-    initialize();
+    bool result = common::networkInitialize();
+    JKN_ASSERT(result, "Network initialization failed");
+
+    if (!result)
+    {
+        return EXIT_FAILURE;
+    }
+
     jkn::IPAddress serverAddress;
     jkn::addressSetHost(serverAddress, 127, 0, 0, 1);
     serverAddress.m_port = 1337;
@@ -44,6 +33,6 @@ int main(int, char**)
         jkn::sleep(1000);
     }
     
-    deinitialize();
+    common::networkShutdown();
     return 0;
 }
