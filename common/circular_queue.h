@@ -29,6 +29,8 @@ namespace common
             InterlockedExchange(&m_val, val);
         }
     };
+#elif JKN_PLATFORM_LINUX
+#   error "atomic int not implemented"
 #endif
 
     // lock free single producer single consumer queue
