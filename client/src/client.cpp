@@ -1,7 +1,9 @@
 #include "client.h"
 #include <jkn/net/ip_address.h>
 #include <stdio.h>
+#include <string.h> // memcpy
 #include <inttypes.h>
+#include <common/packets.h>
 
 namespace pong
 {
@@ -34,8 +36,10 @@ namespace pong
         {
         case ClientState::SendingUsername:
         {
-            const char buffer[] = "ThisIsMyUsername";
-            m_socket.send(m_serverAddress, buffer, sizeof(buffer));
+            common::UsernamePacket packet;
+            char username[] = "ThisIsMyUsername";
+            memcpy(packet.m_username, username, sizeof(username));
+            m_socket.send(m_serverAddress, packet.m_username, sizeof(username));
         }
         break;
         default:
