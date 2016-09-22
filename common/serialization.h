@@ -129,18 +129,41 @@ namespace common
         uint32_t m_bitsRead;
         StreamError::Enum m_error;
     };
-    
+
+
+#define serialize_bytes(stream, data, bytes)                                              \
+    do {                                                                                  \
+        if (!stream.serializeBytes(data, bytes)) return false;                            \
+    } while(0)
+
+#define serialize_int32_range(stream, value, min, max)                                    \
+    do {                                                                                  \
+        JKN_ASSERT(min < max, "min must be less than max");                               \
+        int32_t ivalue;                                                                   \
+        if (Stream::IsWriting) {                                                          \
+            JKN_ASSERT(int64_t(value) >= int64_t(min), "value must be more than min");    \
+            JKN_ASSERT(int64_t(value) <= int64_t(max), "value must be less than max");    \
+            ivalue = (int32_t)value;                                                      \
+        }                                                                                 \
+                                                                                          \
+        if (!stream.serializeInteger(ivalue, min, max)) return false;                     \
+                                                                                          \
+        if (Stream::IsReading) {                                                          \
+            value = ivalue;                                                               \
+            if (value < min || value > max) return false;                                 \
+        }                                                                                 \
+    } while(0)
 
     template <typename Stream>
     inline bool serializeString(Stream& stream, char* string, uint32_t bufferSize)
     {
-        uint32_t len;
+        int32_t len;
         if (Stream::IsWriting)
         {
-            len = (uint32_t)strlen(string);
-            ARENA_ASSERT(len < bufferSize - 1, "Out of bounds");
+            len = strlen(string);
+            JKN_ASSERT(len < (bufferSize - 1), "Out of bounds");
         }
-        serialize_int(stream, len, 0, bufferSize - 1);
+        serialize_int32_range(stream, len, 0, bufferSize - 1);
         serialize_bytes(stream, (uint8_t*)string, len);
 
         if (Stream::IsReading)
