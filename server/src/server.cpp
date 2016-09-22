@@ -3,6 +3,10 @@
 #include <stdio.h> // printf
 #include <inttypes.h> // PRIxYY
 #include "event_queue.h"
+
+#include <common/packets.h>
+#include <common/serialization.h> // stream
+
 namespace pong
 {
     extern bool nextEvent(Event&);
@@ -20,22 +24,29 @@ namespace pong
     {
         printf("Starting server on port %" PRIu16 "\n", Port);
 
-        char buffer[256];
+        uint8_t buffer[256];
         jkn::IPAddress from = {};
 
         while (!processEvents())
         {
             int32_t bytes = m_socket.receive(buffer, sizeof(buffer), from);
 
-            if (bytes > 0)
-            {
-                char ip[64];
-                jkn::addressGetHostIp(from, ip, sizeof(ip));
-                printf("Got packet (size of %d bytes) from %s containing \"%s\"\n", bytes, ip, buffer);
+            if (bytes == 0) continue;
 
-                const char response[] = "Haista paska";
-                m_socket.send(from, response, sizeof(response));
-            }
+            char ip[64];
+            jkn::addressGetHostIp(from, ip, sizeof(ip));
+            //printf("Got packet (size of %d bytes) from %s containing \"%s\"\n", bytes, ip, buffer);
+
+            common::ReadStream stream(buffer, bytes);
+            uint32_t protocol = 0;
+            
+            if (!stream.serializeBits(protocol, 32)) continue;
+
+            printf("protocol = %x\n", protocol);
+
+            const char response[] = "Haista paska";
+            m_socket.send(from, response, sizeof(response));
+
         }
     }
 

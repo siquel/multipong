@@ -4,6 +4,7 @@
 #include <string.h> // memcpy
 #include <inttypes.h>
 #include <common/packets.h>
+#include <common/serialization.h>
 
 namespace pong
 {
@@ -36,10 +37,23 @@ namespace pong
         {
         case ClientState::SendingUsername:
         {
-            common::UsernamePacket packet;
+            /*common::UsernamePacket packet;
             char username[] = "ThisIsMyUsername";
             memcpy(packet.m_username, username, sizeof(username));
-            m_socket.send(m_serverAddress, packet.m_username, sizeof(username));
+            m_socket.send(m_serverAddress, packet.m_username, sizeof(username));*/
+
+            uint8_t buffer[256];
+            common::WriteStream stream(buffer, sizeof(buffer));
+
+            uint32_t protocol = 0xDEADBEEF;
+
+            stream.serializeBytes((uint8_t*)&protocol, sizeof(uint32_t));
+
+            const uint8_t* send = stream.getData();
+            uint32_t bytes = stream.getBytesProcessed();
+
+            m_socket.send(m_serverAddress, send, bytes);
+
         }
         break;
         default:

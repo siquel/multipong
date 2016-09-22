@@ -23,12 +23,9 @@ namespace common
     { 
         UsernamePacket& packet = *(UsernamePacket*)_to;
 
-        if (Stream::IsReading)
-        {
-            
-        }
+        serialize_string(_stream, packet.m_username, MaxUsernameLength);
 
-        return false; 
+        return true; 
     }
 
 

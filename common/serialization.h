@@ -4,6 +4,7 @@
 #include "bit_writer.h"
 #include "bit_reader.h"
 #include <jkn/platform.h>
+#include <string.h> // strlen
 
 namespace common
 {
@@ -157,10 +158,10 @@ namespace common
     template <typename Stream>
     inline bool serializeString(Stream& stream, char* string, uint32_t bufferSize)
     {
-        int32_t len;
+        uint32_t len;
         if (Stream::IsWriting)
         {
-            len = strlen(string);
+            len = uint32_t(strlen(string));
             JKN_ASSERT(len < (bufferSize - 1), "Out of bounds");
         }
         serialize_int32_range(stream, len, 0, bufferSize - 1);
@@ -173,4 +174,9 @@ namespace common
 
         return true;
     }
+
+#define serialize_string(stream, buffer, size)                                          \
+    do {                                                                                \
+        if (!serializeString(stream, buffer, size)) return false;                       \
+    } while (0)
 }
