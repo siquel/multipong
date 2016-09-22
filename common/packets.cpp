@@ -1,30 +1,14 @@
 #include "packets.h"
 #include <stdlib.h> // malloc
 #include <jkn/error.h> // JKN_ASSERT
+#include "serialization.h"
+
 namespace common
 {
     template <typename Stream>
     struct SerializeFunc
     {
         typedef bool(*type)(Stream&, Memory&, void*);
-    };
-
-    struct WriteStream
-    {
-        enum
-        {
-            IsReading = 0,
-            IsWriting = 1
-        };
-    };
-
-    struct ReadStream
-    {
-        enum
-        {
-            IsWriting = 0,
-            IsReading = 1
-        };
     };
 
     struct PacketData
@@ -37,11 +21,11 @@ namespace common
     template <typename Stream>
     bool serializeUsernamePacket(Stream& _stream, Memory& _from, void* _to) 
     { 
-        UsernamePacket* packet = (UsernamePacket*)_to;
+        UsernamePacket& packet = *(UsernamePacket*)_to;
 
         if (Stream::IsReading)
         {
-
+            
         }
 
         return false; 
