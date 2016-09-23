@@ -30,10 +30,11 @@ namespace pong
         while (!processEvents())
         {
             int32_t bytes = m_socket.receive(buffer, sizeof(buffer), from);
+            int32_t packetType;
+            char ip[64];
 
             if (bytes == 0) continue;
-
-            char ip[64];
+            
             jkn::addressGetHostIp(from, ip, sizeof(ip));
             //printf("Got packet (size of %d bytes) from %s containing \"%s\"\n", bytes, ip, buffer);
 
@@ -42,7 +43,11 @@ namespace pong
             
             if (!stream.serializeBits(protocol, 32)) continue;
 
-            printf("protocol = %x\n", protocol);
+            
+            // if the packet type doesn't match we just drop it
+            if (!stream.serializeInteger(packetType, 0, common::PacketType::Count)) continue;
+
+            printf("protocol = %x, packetType = %d\n", protocol, packetType);
 
             const char response[] = "Haista paska";
             m_socket.send(from, response, sizeof(response));

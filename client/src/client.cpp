@@ -47,7 +47,12 @@ namespace pong
 
             uint32_t protocol = 0xDEADBEEF;
 
-            stream.serializeBytes((uint8_t*)&protocol, sizeof(uint32_t));
+            if (!stream.serializeBits(protocol, 32)) 
+            {
+                break;
+            }
+            int32_t type = (int32_t)common::PacketType::UsernamePacket;
+            stream.serializeInteger(type, 0, common::PacketType::Count);
 
             const uint8_t* send = stream.getData();
             uint32_t bytes = stream.getBytesProcessed();
