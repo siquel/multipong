@@ -8,7 +8,7 @@ namespace common
     template <typename Stream>
     struct SerializeFunc
     {
-        typedef bool(*type)(Stream&, Memory&, void*);
+        typedef bool(*type)(Stream&, const Memory&, void*);
     };
 
     struct PacketData
@@ -19,9 +19,9 @@ namespace common
     };
 
     template <typename Stream>
-    bool serializeUsernamePacket(Stream& _stream, Memory& _from, void* _to) 
+    bool serializeUsernamePacket(Stream& _stream, const Memory& _from, void* _to) 
     { 
-        UsernamePacket& packet = *(UsernamePacket*)_to;
+        UsernamePacket& packet = *(UsernamePacket*)_from.ptr;
 
         serialize_string(_stream, packet.m_username, MaxUsernameLength);
 
@@ -38,8 +38,19 @@ namespace common
         IMPLEMENT_PACKET(UsernamePacket),
     };
 
+    template <>
+    bool serialize<ReadStream>(ReadStream& _stream, PacketType::Enum packetType, const Memory& _mem)
+    {
+        return s_packetData[packetType].read(_stream, _mem, NULL);
+    }
 
-    void packetCreate(PacketType::Enum _type, Memory& _to)
+    template <>
+    bool serialize<WriteStream>(WriteStream& _stream, PacketType::Enum _packetType, const Memory& _mem)
+    {
+        return s_packetData[_packetType].write(_stream, _mem, NULL);
+    }
+
+    bool packetCreate(PacketType::Enum _type, Memory& _to)
     {
         size_t mem = s_packetData[_type].size;
 
@@ -47,6 +58,8 @@ namespace common
 
         _to.size = mem;
         _to.ptr = ::malloc(mem);
+
+        return _to.ptr != NULL;
     }
 
     void packetDestroy(Memory& _from)

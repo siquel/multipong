@@ -47,7 +47,21 @@ namespace pong
             // if the packet type doesn't match we just drop it
             if (!stream.serializeInteger(packetType, 0, common::PacketType::Count)) continue;
 
-            printf("protocol = %x, packetType = %d\n", protocol, packetType);
+            common::Memory packetMem;
+
+            if (!common::packetCreate(common::PacketType::Enum(packetType), packetMem))
+            {
+                printf("Allocation failed\n");
+                continue;
+            }
+
+            if (!common::serialize(stream, common::PacketType::Enum(packetType), packetMem))
+            {
+                printf("Serialization failed\n");
+                continue;
+            }
+
+            printf("protocol = %x, packetType = %d, contents = %s\n", protocol, packetType, (char*)packetMem.ptr);
 
             const char response[] = "Haista paska";
             m_socket.send(from, response, sizeof(response));

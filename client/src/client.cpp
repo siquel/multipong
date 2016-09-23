@@ -52,13 +52,37 @@ namespace pong
                 break;
             }
             int32_t type = (int32_t)common::PacketType::UsernamePacket;
-            stream.serializeInteger(type, 0, common::PacketType::Count);
+            
+            if (!stream.serializeInteger(type, 0, common::PacketType::Count))
+            {
+                printf("Serialization failed for %d\n", type);
+                break;
+            }
+
+            common::Memory mem;
+
+            if (!common::packetCreate(common::PacketType::UsernamePacket, mem))
+            {
+                printf("Allocation failed\n");
+                break;
+            }
+
+            common::UsernamePacket* packet = (common::UsernamePacket*)mem.ptr;
+            char username[] = "ThisIsMyUsernamxxxe"; // TODO why doesnt this work with non multiplies with 4?
+            memcpy(packet->m_username, username, sizeof(username));
+
+            if (!common::serialize(stream, common::PacketType::UsernamePacket, mem))
+            {
+                printf("Serialization failed\n");
+                break;
+            }
 
             const uint8_t* send = stream.getData();
             uint32_t bytes = stream.getBytesProcessed();
 
             m_socket.send(m_serverAddress, send, bytes);
 
+            common::packetDestroy(mem);
         }
         break;
         default:
