@@ -42,6 +42,8 @@ namespace pong
             memcpy(packet.m_username, username, sizeof(username));
             m_socket.send(m_serverAddress, packet.m_username, sizeof(username));*/
 
+
+
             uint8_t buffer[256] = {};
             common::WriteStream stream(buffer, sizeof(buffer));
 

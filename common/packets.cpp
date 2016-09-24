@@ -68,5 +68,38 @@ namespace common
         ::free(_from.ptr);
         _from.size = 0;
     }
+
+    int32_t packetProcessOutgoing(uint32_t _protocolId, PacketType::Enum _type, const Memory& _packet, uint8_t* _buffer, uint32_t _bufferSize, uint32_t& _streamSize)
+    {
+        WriteStream stream(_buffer, _bufferSize);
+
+        if (!stream.serializeBits(_protocolId, 32))
+        {
+            return -1;
+        }
+
+        int32_t packetType = int32_t(_type);
+
+        if (!stream.serializeInteger(packetType, 0, common::PacketType::Count - 1))
+        {
+            return -1;
+        }
+
+        if (!serialize(stream, _type, _packet))
+        {
+            return -1;
+        }
+
+        stream.flush();
+
+        if (stream.isError())
+        {
+            return 1;
+        }
+
+        _streamSize = stream.getBytesProcessed();
+
+        return 0;
+    }
 }
 

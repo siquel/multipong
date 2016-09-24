@@ -27,6 +27,8 @@ namespace common
 
     void packetDestroy(Memory& _packet);
 
+    void packetProcessOutgoing(PacketType::Enum _type);
+
     template <typename Stream>
     bool serialize(Stream& _stream, PacketType::Enum packetType, const Memory& _mem);
 
