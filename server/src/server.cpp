@@ -30,38 +30,20 @@ namespace pong
         while (!processEvents())
         {
             int32_t bytes = m_socket.receive(buffer, sizeof(buffer), from);
-            int32_t packetType;
-            char ip[64];
 
             if (bytes == 0) continue;
-            
-            jkn::addressGetHostIp(from, ip, sizeof(ip));
-            //printf("Got packet (size of %d bytes) from %s containing \"%s\"\n", bytes, ip, buffer);
 
-            common::ReadStream stream(buffer, bytes);
-            uint32_t protocol = 0;
-            
-            if (!stream.serializeBits(protocol, 32)) continue;
+            common::Memory packet;
+            common::PacketType::Enum packetType;
+            int32_t result = common::packetProcessIncomingBuffer(0xDEADBEEF, buffer, bytes, packet, packetType);
 
-            
-            // if the packet type doesn't match we just drop it
-            if (!stream.serializeInteger(packetType, 0, common::PacketType::Count - 1)) continue;
-
-            common::Memory packetMem;
-
-            if (!common::packetCreate(common::PacketType::Enum(packetType), packetMem))
+            if (result != 0)
             {
-                printf("Allocation failed\n");
+                printf("packetProcessIncoming failed\n");
                 continue;
             }
 
-            if (!common::serialize(stream, common::PacketType::Enum(packetType), packetMem))
-            {
-                printf("Serialization failed\n");
-                continue;
-            }
-
-            printf("protocol = %x, packetType = %d, contents = %s\n", protocol, packetType, (char*)packetMem.ptr);
+            printf("contents = %s\n", (char*)packet.ptr);
 
             const char response[] = "Haista paska";
             m_socket.send(from, response, sizeof(response));

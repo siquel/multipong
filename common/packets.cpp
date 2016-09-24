@@ -2,6 +2,7 @@
 #include <stdlib.h> // malloc
 #include <jkn/error.h> // JKN_ASSERT
 #include "serialization.h"
+#include "endian.h"
 
 namespace common
 {
@@ -73,7 +74,7 @@ namespace common
     {
         WriteStream stream(_buffer, _bufferSize);
 
-        if (!stream.serializeBits(_protocolId, 32))
+        if (!stream.serializeBits(hostToNetwork(_protocolId), 32))
         {
             return -1;
         }
@@ -98,6 +99,46 @@ namespace common
         }
 
         _streamSize = stream.getBytesProcessed();
+
+        return 0;
+    }
+
+    int32_t packetProcessIncomingBuffer(uint32_t _protocolId, 
+        const uint8_t* _buffer, uint32_t _bytes, 
+        Memory& _packet, PacketType::Enum& _packetType)
+    {
+        ReadStream stream(_buffer, _bytes);
+
+        uint32_t protocol = 0;
+
+        if (!stream.serializeBits(protocol, 32))
+        {
+            return -1;
+        }
+
+        if (_protocolId != networkToHost(protocol))
+        {
+            return -1;
+        }
+
+        int32_t packetType;
+
+        if (!stream.serializeInteger(packetType, 0, PacketType::Count - 1))
+        {
+            return -1;
+        }
+
+        _packetType = PacketType::Enum(packetType);
+
+        if (!packetCreate(common::PacketType::Enum(packetType), _packet))
+        {
+            return -1;
+        }
+
+        if (!serialize(stream, PacketType::Enum(packetType), _packet))
+        {
+            return -1;
+        }
 
         return 0;
     }

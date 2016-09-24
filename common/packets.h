@@ -26,8 +26,10 @@ namespace common
     bool packetCreate(PacketType::Enum packetType, Memory& _to);
 
     void packetDestroy(Memory& _packet);
-
-    void packetProcessOutgoing(PacketType::Enum _type);
+    int32_t packetProcessOutgoing(uint32_t _protocolId, PacketType::Enum _type, const Memory& _packet, uint8_t* _buffer, uint32_t _bufferSize, uint32_t& _streamSize);
+    int32_t packetProcessIncomingBuffer(uint32_t _protocolId, 
+        const uint8_t* _buffer, uint32_t _bytes, 
+        Memory& packet, PacketType::Enum& _packetType);
 
     template <typename Stream>
     bool serialize(Stream& _stream, PacketType::Enum packetType, const Memory& _mem);
