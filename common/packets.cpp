@@ -113,34 +113,34 @@ namespace common
 
         if (!stream.serializeBits(protocol, 32))
         {
-            return -1;
+            return ProcessingErrorType::NoProtocol;
         }
 
         if (_protocolId != networkToHost(protocol))
         {
-            return -1;
+            return ProcessingErrorType::ProtocolMismatch;
         }
 
         int32_t packetType;
 
         if (!stream.serializeInteger(packetType, 0, PacketType::Count - 1))
         {
-            return -1;
+            return ProcessingErrorType::InvalidPacketType;
         }
 
         _packetType = PacketType::Enum(packetType);
 
         if (!packetCreate(common::PacketType::Enum(packetType), _packet))
         {
-            return -1;
+            return ProcessingErrorType::PacketAllocationFailed;
         }
 
         if (!serialize(stream, PacketType::Enum(packetType), _packet))
         {
-            return -1;
+            return ProcessingErrorType::PacketSerializationFailed;
         }
 
-        return 0;
+        return ProcessingErrorType::NoError;
     }
 }
 

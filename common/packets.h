@@ -16,6 +16,19 @@ namespace common
         };
     };
 
+    struct ProcessingErrorType
+    {
+        enum Enum
+        {
+            NoError,
+            NoProtocol,
+            ProtocolMismatch,
+            InvalidPacketType,
+            PacketAllocationFailed,
+            PacketSerializationFailed
+        };
+    };
+
     struct Memory
     {
         void* ptr;
