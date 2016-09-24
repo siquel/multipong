@@ -7,8 +7,9 @@ namespace common
     // write stream
     //////////////////////////////////////////////////////////////////////////
 
-    WriteStream::WriteStream(uint8_t* buffer, uint32_t bytes)
-        : m_writer(buffer, bytes)
+    WriteStream::WriteStream(uint8_t* buffer, uint32_t bytes) : 
+        m_writer(buffer, bytes),
+        m_error(StreamError::NoError)
     {
 
     }

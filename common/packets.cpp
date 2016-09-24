@@ -58,6 +58,7 @@ namespace common
 
         _to.size = mem;
         _to.ptr = ::malloc(mem);
+        memset(_to.ptr, 0, _to.size);
 
         return _to.ptr != NULL;
     }

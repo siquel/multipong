@@ -42,7 +42,7 @@ namespace pong
             memcpy(packet.m_username, username, sizeof(username));
             m_socket.send(m_serverAddress, packet.m_username, sizeof(username));*/
 
-            uint8_t buffer[256];
+            uint8_t buffer[256] = {};
             common::WriteStream stream(buffer, sizeof(buffer));
 
             uint32_t protocol = 0xDEADBEEF;
@@ -53,7 +53,7 @@ namespace pong
             }
             int32_t type = (int32_t)common::PacketType::UsernamePacket;
             
-            if (!stream.serializeInteger(type, 0, common::PacketType::Count))
+            if (!stream.serializeInteger(type, 0, common::PacketType::Count - 1))
             {
                 printf("Serialization failed for %d\n", type);
                 break;
@@ -68,8 +68,7 @@ namespace pong
             }
 
             common::UsernamePacket* packet = (common::UsernamePacket*)mem.ptr;
-            char username[] = "ThisIsMyUsernamxxxe"; // TODO why doesnt this work with non multiplies with 4?
-            memcpy(packet->m_username, username, sizeof(username));
+            strncpy(packet->m_username, "ThisIsMyUsername", 32);
 
             if (!common::serialize(stream, common::PacketType::UsernamePacket, mem))
             {
@@ -77,10 +76,16 @@ namespace pong
                 break;
             }
 
+            // flush remaining bits
+            stream.flush();
+
             const uint8_t* send = stream.getData();
             uint32_t bytes = stream.getBytesProcessed();
 
-            m_socket.send(m_serverAddress, send, bytes);
+            if (!m_socket.send(m_serverAddress, send, bytes))
+            {
+                printf("Send failed\n");
+            }
 
             common::packetDestroy(mem);
         }

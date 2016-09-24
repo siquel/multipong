@@ -45,7 +45,7 @@ namespace pong
 
             
             // if the packet type doesn't match we just drop it
-            if (!stream.serializeInteger(packetType, 0, common::PacketType::Count)) continue;
+            if (!stream.serializeInteger(packetType, 0, common::PacketType::Count - 1)) continue;
 
             common::Memory packetMem;
 

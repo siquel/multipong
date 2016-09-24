@@ -8,8 +8,10 @@ namespace common
     {
         enum Enum
         {
-            UsernamePacket,
-
+            // Client -> Server
+            UsernamePacket, // The client connects to the server, sending in the username
+            // Server -> Client
+            RandomNumberPacket, // The server responds by sending out unique random number
             Count
         };
     };
