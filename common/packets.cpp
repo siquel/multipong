@@ -8,7 +8,7 @@ namespace common
     template <typename Stream>
     struct SerializeFunc
     {
-        typedef bool(*type)(Stream&, const Memory&, void*);
+        typedef bool(*type)(Stream&, const Memory&);
     };
 
     struct PacketData
@@ -19,7 +19,7 @@ namespace common
     };
 
     template <typename Stream>
-    bool serializeUsernamePacket(Stream& _stream, const Memory& _from, void* _to) 
+    bool serializeUsernamePacket(Stream& _stream, const Memory& _from) 
     { 
         UsernamePacket& packet = *(UsernamePacket*)_from.ptr;
 
@@ -41,13 +41,13 @@ namespace common
     template <>
     bool serialize<ReadStream>(ReadStream& _stream, PacketType::Enum packetType, const Memory& _mem)
     {
-        return s_packetData[packetType].read(_stream, _mem, NULL);
+        return s_packetData[packetType].read(_stream, _mem);
     }
 
     template <>
     bool serialize<WriteStream>(WriteStream& _stream, PacketType::Enum _packetType, const Memory& _mem)
     {
-        return s_packetData[_packetType].write(_stream, _mem, NULL);
+        return s_packetData[_packetType].write(_stream, _mem);
     }
 
     bool packetCreate(PacketType::Enum _type, Memory& _to)
