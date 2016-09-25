@@ -9,10 +9,14 @@
 namespace pong
 {
     Client::Client() :
-        m_socket(jkn::IPAddress{ jkn::IPAddressType::IPv4, uint32_t(0), uint16_t(0) }),
+        m_socket(),
         m_clientState(ClientState::Disconnected)
     {
-        
+        jkn::IPAddress address{ jkn::IPAddressType::IPv4, uint32_t(0), uint16_t(0) };
+
+        int32_t result = jkn::socket(m_socket, address);
+        result = jkn::bind(m_socket, address);
+        result = jkn::setToNonBlocking(m_socket);
     }
 
     Client::~Client()
@@ -84,7 +88,7 @@ namespace pong
             const uint8_t* send = stream.getData();
             uint32_t bytes = stream.getBytesProcessed();
 
-            if (!m_socket.send(m_serverAddress, send, bytes))
+            if (!jkn::sendto(m_socket, m_serverAddress, send, bytes))
             {
                 printf("Send failed\n");
             }
@@ -102,7 +106,7 @@ namespace pong
         jkn::IPAddress from = {};
 
         char buffer[256];
-        int32_t bytes = m_socket.receive(buffer, sizeof(buffer), from);
+        int32_t bytes = jkn::receive(m_socket, buffer, sizeof(buffer), from);
 
         if (bytes > 0)
         {

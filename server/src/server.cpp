@@ -14,10 +14,16 @@ namespace pong
     const uint16_t Port = uint16_t(1337);
 
     Server::Server()
-        : m_socket(jkn::IPAddress { jkn::IPAddressType::IPv4, uint32_t(0) /* ANY */, Port })
+        : m_socket()
     {
         memset(m_clientConnected, 0, sizeof(m_clientConnected));
         memset(m_clientAddress, 0, sizeof(m_clientAddress));
+
+        jkn::IPAddress address{ jkn::IPAddressType::IPv4, uint32_t(0) /* ANY */, Port };
+        int32_t result = jkn::socket(m_socket, address);
+
+        result = jkn::bind(m_socket, address);
+        jkn::setToNonBlocking(m_socket);
 
         const uint32_t MaxPackets = 256;
         m_receiveQueue.reserve(MaxPackets);
@@ -36,7 +42,7 @@ namespace pong
         while (!processEvents())
         {
             int32_t bytes = 0;
-            while ((bytes = m_socket.receive(buffer, sizeof(buffer), from)) != 0)
+            while ((bytes = jkn::receive(m_socket, buffer, sizeof(buffer), from)) != 0)
             {
                 common::Memory packet;
                 common::PacketType::Enum packetType;
