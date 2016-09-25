@@ -1,5 +1,6 @@
 # Multipong
 [![Build Status](https://travis-ci.org/siquel/multipong.svg?branch=master)](https://travis-ci.org/siquel/multipong)
+[![Build status](https://ci.appveyor.com/api/projects/status/qgrdul8jpm7yd90x/branch/master?svg=true)](https://ci.appveyor.com/project/siquel/multipong/branch/master)
 
 Multiplayer up to 32 pong game 
 
