@@ -1,0 +1,19 @@
+language: cpp
+
+compiler:
+    - clang
+    - gcc
+
+before_script:
+    git clone https://github.com/siquel/jn.git ../jn
+
+script:
+    - if [ "$CXX" == "clang++" ]; then make linux-clang; fi
+    - if [ "$CXX" == "g++" ]; then make linux-gcc; fi
+
+notifications:
+    email: false
+
+branches:
+    only:
+        - master
