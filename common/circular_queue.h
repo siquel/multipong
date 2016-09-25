@@ -30,7 +30,26 @@ namespace common
         }
     };
 #elif JKN_PLATFORM_LINUX
-#   error "atomic int not implemented"
+    struct AtomicInt
+    {
+        mutable int m_val;
+        
+        AtomicInt(int val)
+        {
+            store(val);
+        }
+
+        int load() const
+        {
+            __sync_fetch_and_add(&m_val, 0);
+            return m_val;
+        }
+
+        void store(int val)
+        {
+            __sync_fetch_and_add(&m_val, val);
+        }
+    };
 #endif
 
     // lock free single producer single consumer queue

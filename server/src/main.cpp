@@ -6,6 +6,7 @@
 #include "server.h"
 #include "event_queue.h"
 #include <common/network.h> // network
+#include <string.h> // strcmp, strcspn
 namespace pong
 {
     int32_t serverProc(void*)
