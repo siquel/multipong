@@ -19,7 +19,10 @@ namespace pong
         memset(m_clientConnected, 0, sizeof(m_clientConnected));
         memset(m_clientAddress, 0, sizeof(m_clientAddress));
 
-        jkn::IPAddress address{ jkn::IPAddressType::IPv4, uint32_t(0) /* ANY */, Port };
+        jkn::IPAddress address;
+        jkn::addressSetHost(address, 0);
+        address.m_port = Port;
+
         int32_t result = jkn::socket(m_socket, address);
 
         result = jkn::bind(m_socket, address);

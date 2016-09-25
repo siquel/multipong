@@ -12,7 +12,9 @@ namespace pong
         m_socket(),
         m_clientState(ClientState::Disconnected)
     {
-        jkn::IPAddress address{ jkn::IPAddressType::IPv4, uint32_t(0), uint16_t(0) };
+        jkn::IPAddress address;
+        jkn::addressSetHost(address, 0);
+        address.m_port = 0;
         
         int32_t result = jkn::socket(m_socket, address);
         result = jkn::bind(m_socket, address);
