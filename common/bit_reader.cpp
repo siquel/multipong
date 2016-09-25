@@ -9,7 +9,9 @@ namespace common
         m_data((uint32_t*)data), 
         m_scratch(0),
         m_numBytes(bytes),
+#if JKN_CONFIG_DEBUG
         m_numWords((bytes + 3) / 4),
+#endif
         m_bitsRead(0),
         m_scratchBits(0),
         m_wordIndex(0)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <jkn/config.h>
 
 namespace common
 {
@@ -39,8 +40,9 @@ namespace common
         uint64_t m_scratch;
         uint32_t m_numBits;
         uint32_t m_numBytes;
-
+#if JKN_CONFIG_DEBUG
         uint32_t m_numWords;
+#endif
 
         uint32_t m_bitsRead;
         uint32_t m_scratchBits;
