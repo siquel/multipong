@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h> // uint32_t
+#include <stddef.h> // size_t
 
 namespace common
 {

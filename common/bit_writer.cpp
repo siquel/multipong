@@ -1,7 +1,7 @@
 #include "bit_writer.h"
 #include <jkn/error.h> // JKN_ASSERT
 #include <string.h> // memcpy
-#include "endian.h" // hostToNetwork,
+#include "network_endian.h" // hostToNetwork,
 namespace common
 {
     BitWriter::BitWriter(void* data, uint32_t bytes) : 

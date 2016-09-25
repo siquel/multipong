@@ -1,7 +1,7 @@
 #include "bit_reader.h"
 #include <jkn/error.h> // JKN_ASSERT
 #include <string.h> // memcpy
-#include "endian.h" // networkToHost
+#include "network_endian.h" // networkToHost
 
 namespace common
 {
