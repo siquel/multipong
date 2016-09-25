@@ -9,7 +9,7 @@
 namespace pong
 {
     Client::Client() :
-        m_socket(jkn::IPAddress{ jkn::IPAddressType::IPv4, uint32_t(0), uint16_t(0) }),
+        m_socket(jkn::IPAddress( jkn::IPAddressType::IPv4, uint32_t(0), uint16_t(0) )),
         m_clientState(ClientState::Disconnected)
     {
         

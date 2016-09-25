@@ -35,7 +35,7 @@ namespace common
 
     bool WriteStream::serializeBytes(const uint8_t* data, uint32_t bytes)
     {
-        JKN_ASSERT(data != nullptr, "Data can't be nullptr");
+        JKN_ASSERT(data != NULL, "Data can't be nullptr");
         // align to byte boundary
         m_writer.writeAlign();
         m_writer.writeBytes(data, bytes);

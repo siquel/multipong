@@ -5,6 +5,7 @@
 #include "bit_reader.h"
 #include <jkn/platform.h>
 #include <string.h> // strlen
+#include <jkn/error.h> //JKN_ASSERT
 
 namespace common
 {
