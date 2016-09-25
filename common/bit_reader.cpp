@@ -1,17 +1,20 @@
 #include "bit_reader.h"
 #include <jkn/error.h> // JKN_ASSERT
 #include <string.h> // memcpy
-#include "endian.h" // networkToHost
+#include "network_endian.h" // networkToHost
 
 namespace common
 {
-    BitReader::BitReader(const void* data, uint32_t bytes)
-        : m_data((uint32_t*)data), m_numBytes(bytes),
-        m_bitsRead(0), m_scratch(0), m_scratchBits(0), m_wordIndex(0),
-        m_numWords((bytes + 3) / 4)
-
+    BitReader::BitReader(const void* data, uint32_t bytes) : 
+        m_data((uint32_t*)data), 
+        m_scratch(0),
+        m_numBytes(bytes),
+        m_numWords((bytes + 3) / 4),
+        m_bitsRead(0),
+        m_scratchBits(0),
+        m_wordIndex(0)
     {
-        JKN_ASSERT(data != nullptr, "Data can't be NULL");
+        JKN_ASSERT(data != NULL, "Data can't be NULL");
         m_numBits = m_numBytes * 8;
     }
 

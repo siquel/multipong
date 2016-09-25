@@ -2,8 +2,7 @@
 #include <stdlib.h> // malloc
 #include <jkn/error.h> // JKN_ASSERT
 #include "serialization.h"
-#include "endian.h"
-
+#include "network_endian.h"
 namespace common
 {
     template <typename Stream>

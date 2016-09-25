@@ -1,18 +1,18 @@
 #include "bit_writer.h"
 #include <jkn/error.h> // JKN_ASSERT
 #include <string.h> // memcpy
-#include "endian.h" // hostToNetwork,
+#include "network_endian.h" // hostToNetwork,
 namespace common
 {
     BitWriter::BitWriter(void* data, uint32_t bytes) : 
         m_data((uint32_t*)data), 
+        m_scratch(0), 
         m_numWords(bytes / 4),
         m_bitsWritten(0), 
         m_wordIndex(0), 
-        m_scratch(0), 
         m_scratchBits(0)
     {
-        JKN_ASSERT(data != nullptr, "Data can not be nullptr");
+        JKN_ASSERT(data != NULL, "Data can not be nullptr");
         JKN_ASSERT(bytes % 4 == 0, "Preallocated buffer size needs be multiple of 4");
         m_numBits = m_numWords * 32; // we work in 32 bit space
     }
