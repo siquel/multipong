@@ -18,36 +18,64 @@ namespace pong
     {
         memset(m_clientConnected, 0, sizeof(m_clientConnected));
         memset(m_clientAddress, 0, sizeof(m_clientAddress));
+
+        const uint32_t MaxPackets = 256;
+        m_receiveQueue.reserve(MaxPackets);
+        m_sendQueue.reserve(MaxPackets);
     }
 
     void Server::start()
     {
         printf("Starting server on port %" PRIu16 "\n", Port);
 
-        uint8_t buffer[256];
+        const uint32_t MaxPacketMem = 1024;
+
+        uint8_t buffer[MaxPacketMem] = {};
         jkn::IPAddress from = {};
 
         while (!processEvents())
         {
-            int32_t bytes = m_socket.receive(buffer, sizeof(buffer), from);
-
-            if (bytes == 0) continue;
-
-            common::Memory packet;
-            common::PacketType::Enum packetType;
-            int32_t result = common::packetProcessIncomingBuffer(0xDEADBEEF, buffer, bytes, packet, packetType);
-
-            if (result != 0)
+            int32_t bytes = 0;
+            while ((bytes = m_socket.receive(buffer, sizeof(buffer), from)) != 0)
             {
-                printf("packetProcessIncoming failed\n");
-                continue;
+                common::Memory packet;
+                common::PacketType::Enum packetType;
+                int32_t result = common::packetProcessIncomingBuffer(0xDEADBEEF, buffer, bytes, packet, packetType);
+
+                if (result != 0)
+                {
+                    printf("packetProcessIncomingBuffer failed\n");
+                    continue;
+                }
+
+                PacketEntry entry;
+                entry.type = packetType;
+                entry.packet = packet;
+                entry.from = from;
+
+                m_receiveQueue.push_back(entry);
             }
 
-            printf("contents = %s\n", (char*)packet.ptr);
+            uint32_t numIncomingPackets = m_receiveQueue.size();
+            for (uint32_t i = 0; i < numIncomingPackets; ++i)
+            {
+                using namespace common;
 
-            const char response[] = "Haista paska";
-            m_socket.send(from, response, sizeof(response));
+                PacketEntry& entry = m_receiveQueue[i];
 
+                switch (entry.type)
+                {
+                case PacketType::UsernamePacket:
+                {
+                    printf("Got username packet, now i just need to do something with it..\n");
+                }
+                break;
+                }
+
+                common::packetDestroy(entry.packet);
+            }
+            // clear all processed packets
+            m_receiveQueue.clear();
         }
     }
 
