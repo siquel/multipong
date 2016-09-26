@@ -19,4 +19,6 @@ install:
     - ..\jn\tools\bin\windows\genie %TOOLSET%
 
 build:
+    parallel: true
+    verbosity: minimal
     project: .build/projects/$(TOOLSET)/multipong.sln
