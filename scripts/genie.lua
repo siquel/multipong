@@ -47,10 +47,6 @@ project "client"
     path.join(PONG_DIR, "client/**.h")
   }
 
-  flags {
-      "FatalWarnings"
-  }
-
   includedirs {
     path.join(JN_DIR, "include"),
     path.join(PONG_DIR, "client"),
@@ -82,10 +78,6 @@ project "server"
     path.join(PONG_DIR, "server/**.h")
   }
 
-  flags {
-      "FatalWarnings"
-  }
-
   includedirs {
     path.join(JN_DIR, "include"),
     path.join(PONG_DIR, "server"),
@@ -111,10 +103,6 @@ project "server"
 
 project "common"
   kind "StaticLib"
-
-  flags {
-      "FatalWarnings"
-  }
 
   files {
     path.join(PONG_DIR, "common/**.cpp"),
