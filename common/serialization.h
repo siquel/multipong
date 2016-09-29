@@ -7,6 +7,11 @@
 #include <string.h> // strlen
 #include <jkn/error.h> //JKN_ASSERT
 
+#if JKN_COMPILER_MSVC
+#   pragma warning(push)
+#   pragma warning(disable: 4127) // conditional expression is constant (templates)
+#endif
+
 namespace common
 {
 
@@ -181,3 +186,7 @@ namespace common
         if (!serializeString(stream, buffer, size)) return false;                       \
     } while (0)
 }
+
+#if JKN_COMPILER_MSVC
+#   pragma warning(pop)
+#endif
