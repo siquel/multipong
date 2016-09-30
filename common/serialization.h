@@ -138,6 +138,26 @@ namespace common
     };
 
 
+#define serialize_bits(stream, value, bits)                                                             \
+    for (;;) {                                                                                          \
+        JKN_ASSERT(bits > 0, "Bits needs to be more than 0");                                           \
+        JKN_ASSERT(bits <= 32, "Bits cant be more than 32");                                            \
+        uint32_t uv;                                                                                    \
+        if (Stream::IsWriting)                                                                          \
+        {                                                                                               \
+            uv = (uint32_t)value;                                                                       \
+        }                                                                                               \
+        if (!stream.serializeBits(uv, bits))                                                            \
+        {                                                                                               \
+            return false;                                                                               \
+        }                                                                                               \
+        if (Stream::IsReading)                                                                          \
+        {                                                                                               \
+            value = uv;                                                                                 \
+        }                                                                                               \
+    break; }
+
+
 #define serialize_bytes(stream, data, bytes)                                              \
     for (;;) {                                                                                  \
         if (!stream.serializeBytes(data, bytes)) return false;                            \
@@ -181,11 +201,35 @@ namespace common
         return true;
     }
 
+    template <typename Stream>
+    inline bool serializeUint64(Stream& stream, uint64_t& value)
+    {
+        uint32_t hi, lo;
+        if (Stream::IsWriting)
+        {
+            lo = value & 0xffffffff;
+            hi = value >> 32;
+        }
+        serialize_bits(stream, lo, 32);
+        serialize_bits(stream, hi, 32);
+
+        if (Stream::IsReading)
+        {
+            value = (uint64_t(hi) << 32) | lo;
+        }
+        return true;
+    }
+
 #define serialize_string(stream, buffer, size)                                          \
-    for (;;) {                                                                                \
+    for (;;) {                                                                          \
         if (!serializeString(stream, buffer, size)) return false;                       \
     break; }
 }
+
+#define serialize_uint64(stream, value)                                                 \
+    for (;;) {                                                                          \
+        if (!serializeUint64(stream, value)) return false;                              \
+    break; }
 
 #if JKN_COMPILER_MSVC
 #   pragma warning(pop)
