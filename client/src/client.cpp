@@ -17,8 +17,11 @@ namespace pong
         address.m_port = 0;
         
         int32_t result = jkn::socket(m_socket, address);
+        JKN_ASSERT(result == 0, "socket() failed");
         result = jkn::bind(m_socket, address);
+        JKN_ASSERT(result == 0, "bind() failed");
         result = jkn::setToNonBlocking(m_socket);
+        JKN_ASSERT(result == 0, "setToNonBlockin() failed");
     }
 
     Client::~Client()
@@ -45,13 +48,6 @@ namespace pong
         {
         case ClientState::SendingUsername:
         {
-            /*common::UsernamePacket packet;
-            char username[] = "ThisIsMyUsername";
-            memcpy(packet.m_username, username, sizeof(username));
-            m_socket.send(m_serverAddress, packet.m_username, sizeof(username));*/
-
-
-
             uint8_t buffer[256] = {};
             common::WriteStream stream(buffer, sizeof(buffer));
 
