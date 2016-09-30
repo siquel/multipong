@@ -126,7 +126,11 @@ namespace common
         _to.ptr = s_allocator.allocate(mem);
         memset(_to.ptr, 0, _to.size);
 
-        return _to.ptr != NULL;
+        bool result = _to.ptr != NULL;
+
+        if (result) ++numAllocs;
+
+        return result;
     }
 
     void packetDestroy(Memory& _from)
@@ -134,6 +138,7 @@ namespace common
         JKN_ASSERT(s_hasBegun, "Allocator hasnt begun");
         s_allocator.deallocate(_from.ptr);
         _from.size = 0;
+        ++numDeallocs;
     }
 
     void packetEnd()

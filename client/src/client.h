@@ -2,6 +2,7 @@
 
 #include <jkn/net/socket.h>
 #include <jkn/net/ip_address.h>
+#include <common/packets.h>
 
 namespace pong
 {
@@ -23,10 +24,11 @@ namespace pong
 
         void connect(const jkn::IPAddress& _serverAddress);
 
-        // Quick hax for now
-        void sendPackets();
-        void receivePackets();
+        void update();
     private:
+        // 0 on success, < 0 failure
+        int32_t sendPacket(common::PacketType::Enum _type, const common::Memory& _packet);
+
         Client(const Client&);
         Client& operator=(const Client&);
 

@@ -29,18 +29,24 @@ namespace pong
 
     }
 
-    void Client::connect(const jkn::IPAddress& _serverAddress)
+    int32_t Client::sendPacket(common::PacketType::Enum _packetType, const common::Memory& _packet)
     {
-        m_clientState = ClientState::SendingUsername;
-        m_serverAddress = _serverAddress;
+        uint8_t buffer[256] = {};
+        uint32_t protocol = 0xDEADBEEF;
+        uint32_t packetSize = 0;
 
-        char ip[64];
-        jkn::addressGetHostIp(_serverAddress, ip, sizeof(ip));
+        common::packetProcessOutgoing(protocol, _packetType, _packet, buffer, sizeof(buffer), packetSize);
 
-        printf("Connecting to server %s port %" PRIu16 "\n", ip, _serverAddress.m_port);
+        if (!jkn::sendto(m_socket, m_serverAddress, buffer, packetSize))
+        {
+            printf("Send failed\n");
+            return -1;
+        }
+
+        return 0;
     }
 
-    void Client::sendPackets()
+    void Client::update()
     {
         common::packetBegin();
 
@@ -48,49 +54,19 @@ namespace pong
         {
         case ClientState::SendingUsername:
         {
-            uint8_t buffer[256] = {};
-            common::WriteStream stream(buffer, sizeof(buffer));
-
-            uint32_t protocol = 0xDEADBEEF;
-
-            if (!stream.serializeBits(protocol, 32)) 
-            {
-                break;
-            }
-            int32_t type = (int32_t)common::PacketType::UsernamePacket;
-            
-            if (!stream.serializeInteger(type, 0, common::PacketType::Count - 1))
-            {
-                printf("Serialization failed for %d\n", type);
-                break;
-            }
-
             common::Memory mem;
-
             if (!common::packetCreate(common::PacketType::UsernamePacket, mem))
             {
                 printf("Allocation failed\n");
                 break;
             }
-
-            common::UsernamePacket* packet = (common::UsernamePacket*)mem.ptr;
-            strncpy(packet->m_username, "ThisIsMyUsername", 32);
-
-            if (!common::serialize(stream, common::PacketType::UsernamePacket, mem))
+            common::UsernamePacket* packet = (common::UsernamePacket*) mem.ptr;
+            char uname[] = "ThisIsMyUsername";
+            strncpy(packet->m_username, uname, sizeof(uname));
+            
+            if (sendPacket(common::PacketType::UsernamePacket, mem) < 0)
             {
-                printf("Serialization failed\n");
-                break;
-            }
-
-            // flush remaining bits
-            stream.flush();
-
-            const uint8_t* send = stream.getData();
-            uint32_t bytes = stream.getBytesProcessed();
-
-            if (!jkn::sendto(m_socket, m_serverAddress, send, bytes))
-            {
-                printf("Send failed\n");
+                printf("Packet send failure\n");
             }
 
             common::packetDestroy(mem);
@@ -100,11 +76,6 @@ namespace pong
             break;
         }
 
-        common::packetEnd();
-    }
-
-    void Client::receivePackets()
-    {
         jkn::IPAddress from = {};
 
         char buffer[256];
@@ -116,7 +87,19 @@ namespace pong
             jkn::addressGetHostIp(from, ip, sizeof(ip));
             printf("Got packet (%d bytes) from %s data = %s\n", bytes, ip, buffer);
         }
+
+        common::packetEnd();
     }
 
+    void Client::connect(const jkn::IPAddress& _serverAddress)
+    {
+        m_clientState = ClientState::SendingUsername;
+        m_serverAddress = _serverAddress;
+
+        char ip[64];
+        jkn::addressGetHostIp(_serverAddress, ip, sizeof(ip));
+
+        printf("Connecting to server %s port %" PRIu16 "\n", ip, _serverAddress.m_port);
+    }
 }
 

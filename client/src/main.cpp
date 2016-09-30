@@ -26,8 +26,7 @@ int main(int, char**)
 
     while (true)
     {
-        client.sendPackets();
-        client.receivePackets();
+        client.update();
         jkn::sleep(1000);
     }
     
