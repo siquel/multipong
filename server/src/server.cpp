@@ -44,6 +44,8 @@ namespace pong
 
         while (!processEvents())
         {
+            common::packetBegin();
+
             int32_t bytes = 0;
             while ((bytes = jkn::receive(m_socket, buffer, sizeof(buffer), from)) != 0)
             {
@@ -77,6 +79,7 @@ namespace pong
                 case PacketType::UsernamePacket:
                 {
                     printf("Got username packet, now i just need to do something with it..\n");
+                    printf("Data = %s\n", (char*)entry.packet.ptr);
                 }
                 break;
                 }
@@ -85,6 +88,8 @@ namespace pong
             }
             // clear all processed packets
             m_receiveQueue.clear();
+
+            common::packetEnd();
         }
     }
 

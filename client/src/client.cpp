@@ -39,6 +39,8 @@ namespace pong
 
     void Client::sendPackets()
     {
+        common::packetBegin();
+
         switch (m_clientState)
         {
         case ClientState::SendingUsername:
@@ -101,6 +103,8 @@ namespace pong
         default:
             break;
         }
+
+        common::packetEnd();
     }
 
     void Client::receivePackets()

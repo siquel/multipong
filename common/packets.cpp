@@ -5,6 +5,56 @@
 #include "network_endian.h"
 namespace common
 {
+    void* alignTop(void* _ptr, uint32_t _align)
+    {
+        uintptr_t ptr = (uintptr_t)_ptr;
+        uint32_t mod = ptr % _align;
+
+        if (mod) ptr += _align - mod;
+
+        return (void*)ptr;
+    }
+
+    struct LinearAllocator
+    {
+        LinearAllocator(uint32_t _size) :
+            m_offset(0),
+            m_size(_size)
+        {
+            m_start = malloc(_size);
+        }
+
+        ~LinearAllocator()
+        {
+            free(m_start);
+        }
+
+        void* allocate(uint32_t _size, uint32_t _align = 4)
+        {
+            uint32_t size = _size + _align;
+
+            if (m_offset + size > m_size) return NULL;
+
+            void* ptr = alignTop((char*)m_start + m_offset, _align);
+            m_offset += size;
+            return ptr;
+        }
+
+        void deallocate(void*)
+        {
+            // not supported
+        }
+
+        void clear()
+        {
+            m_offset = 0;
+        }
+
+        void* m_start;
+        uint32_t m_offset;
+        uint32_t m_size;
+    };
+
     template <typename Stream>
     struct SerializeFunc
     {
@@ -50,14 +100,30 @@ namespace common
         return s_packetData[_packetType].write(_stream, _mem);
     }
 
+    static LinearAllocator s_allocator(1024 * 1024);
+    static bool s_hasBegun = false;
+    static uint32_t numAllocs = 0;
+    static uint32_t numDeallocs = 0;
+
+    void packetBegin()
+    {
+        JKN_ASSERT(!s_hasBegun, "Already called packetBegin()");
+        JKN_ASSERT(numAllocs == 0, "Can not allocate before begin");
+        JKN_ASSERT(numDeallocs == 0, "Can not deallocate before begin");
+        numAllocs = 0;
+        numDeallocs = 0;
+        s_hasBegun = true;
+    }
+
     bool packetCreate(PacketType::Enum _type, Memory& _to)
     {
+        JKN_ASSERT(s_hasBegun, "Allocator hasnt begun");
         size_t mem = s_packetData[_type].size;
 
         JKN_ASSERT(mem > 0, "Size must be greater that 0");
 
         _to.size = mem;
-        _to.ptr = ::malloc(mem);
+        _to.ptr = s_allocator.allocate(mem);
         memset(_to.ptr, 0, _to.size);
 
         return _to.ptr != NULL;
@@ -65,8 +131,19 @@ namespace common
 
     void packetDestroy(Memory& _from)
     {
-        ::free(_from.ptr);
+        JKN_ASSERT(s_hasBegun, "Allocator hasnt begun");
+        s_allocator.deallocate(_from.ptr);
         _from.size = 0;
+    }
+
+    void packetEnd()
+    {
+        JKN_ASSERT(s_hasBegun, "packetEnd() must be called first");
+        JKN_ASSERT(numAllocs == numDeallocs, "Invalid amount of deallocs");
+        numAllocs = 0;
+        numDeallocs = 0;
+        s_hasBegun = false;
+        s_allocator.clear();
     }
 
     int32_t packetProcessOutgoing(uint32_t _protocolId, PacketType::Enum _type, const Memory& _packet, uint8_t* _buffer, uint32_t _bufferSize, uint32_t& _streamSize)

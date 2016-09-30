@@ -36,10 +36,14 @@ namespace common
         size_t size;
     };
 
+    void packetBegin();
 
     bool packetCreate(PacketType::Enum packetType, Memory& _to);
 
     void packetDestroy(Memory& _packet);
+
+    void packetEnd();
+
     int32_t packetProcessOutgoing(uint32_t _protocolId, PacketType::Enum _type, const Memory& _packet, uint8_t* _buffer, uint32_t _bufferSize, uint32_t& _streamSize);
     int32_t packetProcessIncomingBuffer(uint32_t _protocolId, 
         const uint8_t* _buffer, uint32_t _bytes, 
