@@ -139,12 +139,12 @@ namespace common
 
 
 #define serialize_bytes(stream, data, bytes)                                              \
-    do {                                                                                  \
+    for (;;) {                                                                                  \
         if (!stream.serializeBytes(data, bytes)) return false;                            \
-    } while(0)
+    break; }
 
 #define serialize_int32_range(stream, value, min, max)                                    \
-    do {                                                                                  \
+    for (;;) {                                                                                  \
         JKN_ASSERT(min < max, "min must be less than max");                               \
         int32_t ivalue;                                                                   \
         if (Stream::IsWriting) {                                                          \
@@ -159,7 +159,7 @@ namespace common
             value = ivalue;                                                               \
             if (value < min || value > max) return false;                                 \
         }                                                                                 \
-    } while(0)
+    break; }
 
     template <typename Stream>
     inline bool serializeString(Stream& stream, char* string, uint32_t bufferSize)
@@ -182,9 +182,9 @@ namespace common
     }
 
 #define serialize_string(stream, buffer, size)                                          \
-    do {                                                                                \
+    for (;;) {                                                                                \
         if (!serializeString(stream, buffer, size)) return false;                       \
-    } while (0)
+    break; }
 }
 
 #if JKN_COMPILER_MSVC

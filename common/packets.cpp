@@ -81,9 +81,11 @@ namespace common
     template <typename Stream>
     bool serializeRandomNumberPacket(Stream& _stream, const Memory& _packet)
     {
+        (void)_stream;
         RandomNumberPacket& packet = *(RandomNumberPacket*)_packet.ptr;
-
+        (void)packet;
         //serialize_uint64()
+        return false;
     }
 
 
