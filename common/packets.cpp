@@ -78,6 +78,13 @@ namespace common
         return true; 
     }
 
+    template <typename Stream>
+    bool serializeRandomNumberPacket(Stream& _stream, const Memory& _packet)
+    {
+        RandomNumberPacket& packet = *(RandomNumberPacket*)_packet.ptr;
+
+        //serialize_uint64()
+    }
 
 
 #define IMPLEMENT_PACKET(packet) { serialize##packet<ReadStream>, serialize##packet<WriteStream>, sizeof(packet) }
@@ -86,6 +93,7 @@ namespace common
     static PacketData s_packetData[] =
     {
         IMPLEMENT_PACKET(UsernamePacket),
+        IMPLEMENT_PACKET(RandomNumberPacket)
     };
 
     template <>

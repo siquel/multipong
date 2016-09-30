@@ -6,6 +6,8 @@
 
 #include <common/packets.h>
 #include <common/serialization.h> // stream
+#include <common/hash.h> // murmur_hash_64
+#include <time.h> // time
 
 namespace pong
 {
@@ -13,9 +15,13 @@ namespace pong
 
     const uint16_t Port = uint16_t(1337);
 
-    Server::Server()
-        : m_socket()
+    Server::Server() : 
+        m_socket(),
+        m_serverSeed(0)
     {
+        srand(uint32_t(time(NULL)));
+        m_serverSeed = common::genSalt();
+
         memset(m_clientConnected, 0, sizeof(m_clientConnected));
         memset(m_clientAddress, 0, sizeof(m_clientAddress));
 
@@ -78,8 +84,15 @@ namespace pong
                 {
                 case PacketType::UsernamePacket:
                 {
+                    UsernamePacket* packet = (UsernamePacket*)entry.packet.ptr;
+
                     printf("Got username packet, now i just need to do something with it..\n");
                     printf("Data = %s\n", (char*)entry.packet.ptr);
+                    uint32_t len = (uint32_t)strlen(packet->m_username);
+                    printf("%" PRIu64 "\n", 
+                        murmur_hash_64(&m_serverSeed,
+                        8u,
+                        murmur_hash_64(packet->m_username, len, uint32_t(time(NULL)))));
                 }
                 break;
                 }

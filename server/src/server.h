@@ -34,6 +34,8 @@ namespace pong
         // lookup for client index
         jkn::IPAddress m_clientAddress[MaxClients];
 
+        uint64_t m_serverSeed;
+
         std::vector<PacketEntry> m_receiveQueue;
         std::vector<PacketEntry> m_sendQueue;
     private:

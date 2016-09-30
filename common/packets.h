@@ -58,4 +58,9 @@ namespace common
     {
         char m_username[MaxUsernameLength];
     };
+
+    struct RandomNumberPacket
+    {
+        uint64_t m_randomNumber;
+    };
 }
