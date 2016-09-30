@@ -25,6 +25,9 @@ namespace pong
         void start();
 
     private:
+        void processUsernamePacket(common::UsernamePacket* _packet);
+
+
         bool processEvents();
 
         jkn::UDPSocket m_socket;

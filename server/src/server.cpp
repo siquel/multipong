@@ -11,6 +11,8 @@
 
 namespace pong
 {
+    using namespace common;
+
     extern bool nextEvent(Event&);
 
     const uint16_t Port = uint16_t(1337);
@@ -37,6 +39,18 @@ namespace pong
         const uint32_t MaxPackets = 256;
         m_receiveQueue.reserve(MaxPackets);
         m_sendQueue.reserve(MaxPackets);
+    }
+
+    void Server::processUsernamePacket(common::UsernamePacket* _packet)
+    {
+        printf("Got username packet, now i just need to do something with it..\n");
+        printf("Data = %s\n", _packet->m_username);
+        uint32_t len = (uint32_t)strlen(_packet->m_username);
+        uint64_t hash =
+            murmur_hash_64(&m_serverSeed,
+                8u,
+                murmur_hash_64(_packet->m_username, len, uint32_t(time(NULL))));
+        printf("%" PRIx64 "\n", hash);
     }
 
     void Server::start()
@@ -84,15 +98,7 @@ namespace pong
                 {
                 case PacketType::UsernamePacket:
                 {
-                    UsernamePacket* packet = (UsernamePacket*)entry.packet.ptr;
-
-                    printf("Got username packet, now i just need to do something with it..\n");
-                    printf("Data = %s\n", (char*)entry.packet.ptr);
-                    uint32_t len = (uint32_t)strlen(packet->m_username);
-                    printf("%" PRIu64 "\n", 
-                        murmur_hash_64(&m_serverSeed,
-                        8u,
-                        murmur_hash_64(packet->m_username, len, uint32_t(time(NULL)))));
+                    processUsernamePacket((UsernamePacket*)entry.packet.ptr);
                 }
                 break;
                 }
