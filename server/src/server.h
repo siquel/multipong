@@ -25,7 +25,7 @@ namespace pong
         void start();
 
     private:
-        void processUsernamePacket(common::UsernamePacket* _packet);
+        void processUsernamePacket(common::UsernamePacket* _packet, const jkn::IPAddress& _from);
 
 
         bool processEvents();

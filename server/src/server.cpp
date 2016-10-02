@@ -41,7 +41,7 @@ namespace pong
         m_sendQueue.reserve(MaxPackets);
     }
 
-    void Server::processUsernamePacket(common::UsernamePacket* _packet)
+    void Server::processUsernamePacket(common::UsernamePacket* _packet, const jkn::IPAddress& _from)
     {
         printf("Got username packet, now i just need to do something with it..\n");
         printf("Data = %s\n", _packet->m_username);
@@ -50,7 +50,23 @@ namespace pong
             murmur_hash_64(&m_serverSeed,
                 8u,
                 murmur_hash_64(_packet->m_username, len, uint32_t(time(NULL))));
-        printf("%" PRIx64 "\n", hash);
+        
+        common::Memory packetMemory;
+
+        if (!common::packetCreate(PacketType::RandomNumberPacket, packetMemory))
+        {
+            JKN_ASSERT(0, "Allocation failed");
+        }
+
+        common::RandomNumberPacket& packet = *(RandomNumberPacket*)packetMemory.ptr;
+        packet.m_randomNumber = hash;
+
+        PacketEntry entry;
+        entry.from = _from;
+        entry.packet = packetMemory;
+        entry.type = PacketType::RandomNumberPacket;
+
+        m_sendQueue.push_back(entry);
     }
 
     void Server::start()
@@ -87,8 +103,8 @@ namespace pong
                 m_receiveQueue.push_back(entry);
             }
 
-            uint32_t numIncomingPackets = m_receiveQueue.size();
-            for (uint32_t i = 0; i < numIncomingPackets; ++i)
+            size_t numIncomingPackets = m_receiveQueue.size();
+            for (size_t i = 0; i < numIncomingPackets; ++i)
             {
                 using namespace common;
 
@@ -98,15 +114,40 @@ namespace pong
                 {
                 case PacketType::UsernamePacket:
                 {
-                    processUsernamePacket((UsernamePacket*)entry.packet.ptr);
+                    processUsernamePacket((UsernamePacket*)entry.packet.ptr, entry.from);
                 }
                 break;
                 }
 
                 common::packetDestroy(entry.packet);
             }
+
+            size_t numOutgoingPackets = m_sendQueue.size();
+            for (size_t i = 0; i < numOutgoingPackets; ++i)
+            {
+                using namespace common;
+
+                PacketEntry& entry = m_sendQueue[i];
+
+                // TODO allocator
+                uint32_t dataSize;
+
+                if (packetProcessOutgoing(0xDEADBEEF, PacketType::Enum(entry.type), entry.packet, buffer, sizeof(buffer), dataSize) != 0)
+                {
+                    JKN_ASSERT(0, "PacketProcess failed");
+                }
+
+                if (!jkn::sendto(m_socket, entry.from, buffer, dataSize))
+                {
+                    JKN_ASSERT(0, "sendto failed");
+                }
+
+                common::packetDestroy(entry.packet);
+            }
+
             // clear all processed packets
             m_receiveQueue.clear();
+            m_sendQueue.clear();
 
             common::packetEnd();
         }

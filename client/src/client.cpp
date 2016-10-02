@@ -73,19 +73,39 @@ namespace pong
         }
         break;
         default:
+
             break;
         }
 
         jkn::IPAddress from = {};
 
-        char buffer[256];
+        uint8_t buffer[256];
         int32_t bytes = jkn::receive(m_socket, buffer, sizeof(buffer), from);
 
         if (bytes > 0)
         {
-            char ip[64];
-            jkn::addressGetHostIp(from, ip, sizeof(ip));
-            printf("Got packet (%d bytes) from %s data = %s\n", bytes, ip, buffer);
+            common::Memory packetMem;
+            common::PacketType::Enum packetType;
+
+            if (common::packetProcessIncomingBuffer(0xDEADBEEF, buffer, bytes, packetMem, packetType) != 0)
+            {
+                JKN_ASSERT(0, "packetProcessIncomingBuffer failed");
+            }
+
+            switch (packetType)
+            {
+            case common::PacketType::RandomNumberPacket:
+            {
+                common::RandomNumberPacket& packet = *(common::RandomNumberPacket*)packetMem.ptr;
+                printf("Got random number %" PRIx64 "\n", packet.m_randomNumber);
+            }
+            break;
+            default:
+                printf("Unknown packet %d\n", (int32_t)packetType);
+                break;
+            }
+
+            common::packetDestroy(packetMem);
         }
 
         common::packetEnd();
